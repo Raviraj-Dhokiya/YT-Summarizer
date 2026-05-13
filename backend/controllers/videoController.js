@@ -52,6 +52,11 @@ export const summarizeVideo = async (req, res) => {
     try {
       aiResult = await generateSummary(transcript, title, language);
     } catch (err) {
+      if (err.message === 'QUOTA_EXCEEDED') {
+        return res.status(429).json({
+          error: '⚠️ Daily AI limit reached. Our free API quota has been used up for today. Please try again tomorrow!',
+        });
+      }
       return res.status(500).json({ error: 'AI summary generation failed: ' + err.message });
     }
 
@@ -130,7 +135,17 @@ export const chatWithVideoController = async (req, res) => {
       return res.status(422).json({ error: 'Could not fetch transcript for this video.' });
     }
 
-    const answer = await chatWithVideo(transcript, videoTitle, question, chatHistory);
+    let answer;
+    try {
+      answer = await chatWithVideo(transcript, videoTitle, question, chatHistory);
+    } catch (err) {
+      if (err.message === 'QUOTA_EXCEEDED') {
+        return res.status(429).json({
+          error: '⚠️ Daily AI limit reached. Our free API quota has been used up for today. Please try again tomorrow!',
+        });
+      }
+      return res.status(500).json({ error: 'Chat failed: ' + err.message });
+    }
     return res.json({ success: true, answer });
   } catch (err) {
     console.error('❌ chatWithVideo error:', err);

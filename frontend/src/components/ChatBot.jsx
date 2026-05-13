@@ -68,10 +68,16 @@ export default function ChatBot({ videoId, videoTitle }) {
       const res = await chatWithVideoApi(videoId, trimmed, chatHistory.slice(0, -1));
       const answer = res.data.answer || 'Sorry, I could not get a response.';
       setMessages((prev) => [...prev, { role: 'bot', content: answer }]);
-    } catch {
+    } catch (err) {
+      const status = err?.response?.status;
+      const backendMsg = err?.response?.data?.error;
+      const msg =
+        status === 429
+          ? '📅 Daily AI limit reached for today. Please come back tomorrow!'
+          : backendMsg || '❌ Something went wrong. Please try again.';
       setMessages((prev) => [
         ...prev,
-        { role: 'bot', content: '❌ Something went wrong. Please try again.' },
+        { role: 'bot', content: msg, isQuota: status === 429 },
       ]);
     } finally {
       setLoading(false);
@@ -154,7 +160,9 @@ export default function ChatBot({ videoId, videoTitle }) {
               )}
               <div className={`
                 max-w-[82%] px-3 py-2 rounded-2xl text-[13px] leading-relaxed
-                ${msg.role === 'user'
+                ${msg.isQuota
+                  ? 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 rounded-bl-sm'
+                  : msg.role === 'user'
                   ? 'bg-[#2563eb] dark:bg-[#60a5fa] text-white rounded-br-sm'
                   : 'bg-[#f0f0f0] dark:bg-[#2a2a2a] text-[#111] dark:text-[#f0f0f0] rounded-bl-sm'
                 }

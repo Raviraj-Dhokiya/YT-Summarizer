@@ -105,7 +105,7 @@ function DeleteConfirmModal({ video, onConfirm, onCancel }) {
 }
 
 // ── Main History Component ────────────────────────────────────────────────────
-export default function History({ history, onSelect, onDelete, currentVideoId, loading }) {
+export default function History({ history, onSelect, onDelete, currentVideoId, loading, error }) {
   const [search, setSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState(null); // video object to confirm
 
@@ -180,6 +180,28 @@ export default function History({ history, onSelect, onDelete, currentVideoId, l
         {[1, 2, 3].map((i) => (
           <div key={i} className="skeleton h-[70px] mb-3 rounded-lg" />
         ))}
+      </div>
+    );
+  }
+
+  // ── Error ─────────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-[#1a1a1a] rounded-xl border border-[#e0e0e0] dark:border-[#2e2e2e] p-6 flex flex-col h-[calc(100vh-80px)] sticky top-10">
+        {header}
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-red-400 opacity-70">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p className="text-[12px] text-[#555] dark:text-[#909090]">
+            Could not load history.
+          </p>
+          <p className="text-[11px] text-[#999] dark:text-[#555] max-w-[200px]">
+            {error}
+          </p>
+        </div>
       </div>
     );
   }

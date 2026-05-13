@@ -8,11 +8,9 @@ const themeSlice = createSlice({
   reducers: {
     toggleTheme: (state) => {
       state.isDark = !state.isDark;
+      // ✅ Only pure state update + localStorage here.
+      // DOM side effects (data-theme, class) are handled in App.jsx useEffect.
       localStorage.setItem('theme', state.isDark ? 'dark' : 'light');
-      document.documentElement.setAttribute(
-        'data-theme',
-        state.isDark ? 'dark' : 'light'
-      );
     },
   },
 });

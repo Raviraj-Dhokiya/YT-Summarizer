@@ -9,7 +9,7 @@ import { fetchHistory, deleteVideo } from '../store/historySlice';
 export function useVideo() {
   const dispatch = useDispatch();
   const { currentVideo, loading, error } = useSelector((state) => state.video);
-  const { items: history, loading: historyLoading } = useSelector((state) => state.history);
+  const { items: history, loading: historyLoading, error: historyError } = useSelector((state) => state.history);
 
   const handleSummarize = (url, language = 'English') => {
     dispatch(summarizeVideo({ url, language })).then((action) => {
@@ -49,6 +49,7 @@ export function useVideo() {
     error,
     history,
     historyLoading,
+    historyError,
     handleSummarize,
     handleDelete,
     handleSelect,

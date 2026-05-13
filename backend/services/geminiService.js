@@ -10,8 +10,8 @@ export async function generateSummary(transcript, videoTitle, language = 'Englis
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set in environment variables.');
 
-  const model = 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+  const model = 'gemini-2.0-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const transcriptText = transcript.map((t) => t.text).join(' ');
   const truncated = transcriptText.slice(0, 12000);
@@ -58,6 +58,9 @@ Return this exact JSON structure:
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error('QUOTA_EXCEEDED');
+    }
     const errBody = await response.text();
     throw new Error(`Gemini API error [${response.status}]: ${errBody}`);
   }
@@ -107,8 +110,8 @@ export async function chatWithVideo(transcript, videoTitle, question, chatHistor
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set in environment variables.');
 
-  const model = 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+  const model = 'gemini-2.0-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const transcriptText = transcript.map((t) => t.text).join(' ');
   const truncated = transcriptText.slice(0, 10000);
@@ -139,6 +142,9 @@ Answer in the same language the user asked the question in. Be concise (2-4 sent
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error('QUOTA_EXCEEDED');
+    }
     const errBody = await response.text();
     throw new Error(`Gemini API error [${response.status}]: ${errBody}`);
   }
