@@ -4,7 +4,6 @@ import VideoResult from './components/VideoResult';
 import History from './components/History';
 import { useVideo } from './hooks/useVideo';
 import { useTheme } from './hooks/useTheme';
-import styles from './App.module.css';
 import './index.css';
 
 export default function App() {
@@ -23,9 +22,13 @@ export default function App() {
 
   const { isDark, handleToggle } = useTheme();
 
-  // Apply theme on mount and change
+  // Apply Tailwind dark mode class on <html>
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [isDark]);
 
   // Fetch history on mount
@@ -34,20 +37,41 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0f0f0f] text-[#111111] dark:text-[#f0f0f0] font-sans transition-colors duration-300">
+
       {/* Theme Toggle Button */}
       <button
-        className="theme-toggle"
+        id="theme-toggle"
         onClick={handleToggle}
         title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         aria-label="Toggle theme"
+        className="fixed top-4 right-5 z-[999] w-[38px] h-[38px] flex items-center justify-center
+          bg-white dark:bg-[#1a1a1a]
+          border border-[#e0e0e0] dark:border-[#2e2e2e]
+          text-[#555] dark:text-[#909090]
+          rounded-lg text-lg cursor-pointer
+          transition-all duration-150
+          hover:bg-[#f0f0f0] dark:hover:bg-[#242424]
+          hover:text-[#111] dark:hover:text-[#f0f0f0]
+          hover:border-[#d0d0d0] dark:hover:border-[#3a3a3a]"
       >
         {isDark ? '☀️' : '🌙'}
       </button>
 
-      <div className={styles.container}>
-        <main className={styles.main}>
-          {error && <div className={styles.error}>{error}</div>}
+      {/* Main layout */}
+      <div className="flex max-w-[1400px] mx-auto min-h-screen px-5 py-10 gap-10 flex-col lg:flex-row">
+
+        {/* Main content */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {error && (
+            <div className="
+              bg-red-500/10 text-[#cc0000] dark:text-[#ff4444]
+              px-4 py-4 rounded-lg mb-6
+              border border-red-500/20
+            ">
+              {error}
+            </div>
+          )}
 
           {!currentVideo ? (
             <URLInput onSubmit={handleSummarize} loading={loading} />
@@ -56,7 +80,8 @@ export default function App() {
           )}
         </main>
 
-        <aside className={styles.sidebar}>
+        {/* Sidebar */}
+        <aside className="lg:w-[340px] flex-shrink-0">
           <History
             history={history}
             onSelect={handleSelect}
@@ -66,6 +91,6 @@ export default function App() {
           />
         </aside>
       </div>
-    </>
+    </div>
   );
 }
