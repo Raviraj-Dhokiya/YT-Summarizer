@@ -65,16 +65,16 @@ export default function App() {
         <main className="flex-1 flex flex-col min-w-0">
           {error && (
             <div className="
-              bg-red-500/10 text-[#cc0000] dark:text-[#ff4444]
+              bg-blue-500/10 text-[#1d4ed8] dark:text-[#60a5fa]
               px-4 py-4 rounded-lg mb-6
-              border border-red-500/20
+              border border-blue-500/20
             ">
               {error}
             </div>
           )}
 
           {!currentVideo ? (
-            <URLInput onSubmit={handleSummarize} loading={loading} />
+            <URLInput onSubmit={(url, lang) => handleSummarize(url, lang)} loading={loading} />
           ) : (
             <VideoResult data={currentVideo} onBack={handleBack} />
           )}

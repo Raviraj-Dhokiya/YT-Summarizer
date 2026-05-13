@@ -11,8 +11,8 @@ export function useVideo() {
   const { currentVideo, loading, error } = useSelector((state) => state.video);
   const { items: history, loading: historyLoading } = useSelector((state) => state.history);
 
-  const handleSummarize = (url) => {
-    dispatch(summarizeVideo(url)).then((action) => {
+  const handleSummarize = (url, language = 'English') => {
+    dispatch(summarizeVideo({ url, language })).then((action) => {
       if (summarizeVideo.fulfilled.match(action)) {
         dispatch(fetchHistory());
       }

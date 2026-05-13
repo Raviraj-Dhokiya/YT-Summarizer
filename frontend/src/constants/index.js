@@ -13,8 +13,8 @@ export const VIDEO_TABS = ['Summary', 'Key Points', 'Timestamps'];
 
 // Example URLs shown in the URL input
 export const EXAMPLE_URLS = [
-  'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-  'https://youtu.be/dQw4w9WgXcQ',
+  'https://www.youtube.com/watch?v=Zi_XLOBDo_Y',
+  'https://youtu.be/Zi_XLOBDo_Y',
 ];
 
 // Supported YouTube URL patterns (for display/hints only)

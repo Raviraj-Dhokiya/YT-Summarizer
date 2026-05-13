@@ -1,20 +1,20 @@
 import { YoutubeTranscript } from 'youtube-transcript';
 import Video from '../models/Video.js';
-import { generateSummary } from '../services/geminiService.js';
+import { generateSummary, chatWithVideo } from '../services/geminiService.js';
 import { extractVideoId } from '../utils/extractVideoId.js';
 import { formatTime } from '../utils/formatTime.js';
 
 // POST /api/summarize
 export const summarizeVideo = async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, language = 'English' } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
     const videoId = extractVideoId(url);
     if (!videoId) return res.status(400).json({ error: 'Invalid YouTube URL' });
 
-    // Check MongoDB cache — return instantly if already processed
-    const existing = await Video.findOne({ videoId });
+    // Check MongoDB cache — only return if SAME language was already processed
+    const existing = await Video.findOne({ videoId, language });
     if (existing) {
       return res.json({ success: true, data: existing, cached: true });
     }
@@ -50,7 +50,7 @@ export const summarizeVideo = async (req, res) => {
     // Generate AI summary via Gemini
     let aiResult;
     try {
-      aiResult = await generateSummary(transcript, title);
+      aiResult = await generateSummary(transcript, title, language);
     } catch (err) {
       return res.status(500).json({ error: 'AI summary generation failed: ' + err.message });
     }
@@ -69,9 +69,10 @@ export const summarizeVideo = async (req, res) => {
       return { time: formatTime(seconds), seconds, title: section.title };
     });
 
-    // Save to MongoDB
+    // Save to MongoDB (keyed by videoId + language)
     const video = new Video({
       videoId,
+      language,
       url,
       title,
       thumbnail,
@@ -106,5 +107,33 @@ export const deleteVideo = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+// POST /api/chat
+export const chatWithVideoController = async (req, res) => {
+  try {
+    const { videoId, question, chatHistory = [] } = req.body;
+    if (!videoId || !question) {
+      return res.status(400).json({ error: 'videoId and question are required' });
+    }
+
+    // Get video title from DB for context
+    const video = await Video.findOne({ videoId });
+    const videoTitle = video?.title || 'YouTube Video';
+
+    // Fetch fresh transcript for chat context
+    let transcript;
+    try {
+      transcript = await YoutubeTranscript.fetchTranscript(videoId);
+    } catch (err) {
+      return res.status(422).json({ error: 'Could not fetch transcript for this video.' });
+    }
+
+    const answer = await chatWithVideo(transcript, videoTitle, question, chatHistory);
+    return res.json({ success: true, answer });
+  } catch (err) {
+    console.error('❌ chatWithVideo error:', err);
+    res.status(500).json({ error: 'Chat failed: ' + err.message });
   }
 };

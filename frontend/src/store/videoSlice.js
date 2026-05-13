@@ -4,9 +4,9 @@ import { summarizeVideoApi } from '../api';
 // Async thunk: video summarize karo
 export const summarizeVideo = createAsyncThunk(
   'video/summarize',
-  async (url, { rejectWithValue }) => {
+  async ({ url, language = 'English' }, { rejectWithValue }) => {
     try {
-      const res = await summarizeVideoApi(url);
+      const res = await summarizeVideoApi(url, language);
       if (res.data.success) {
         return res.data.data;
       }
